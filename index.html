@@ -406,6 +406,44 @@
   const loadFileBtn = document.getElementById("loadFileBtn");
   const fileInput = document.getElementById("fileInput");
 
+  // Load data from CSV rows into data object
+  function loadDataFromCSV(rows) {
+    // Clear existing math, english, computer, and also merge current (adding new current topics)
+    ['math', 'english', 'computer'].forEach(subj => data[subj].topics = {});
+    rows.forEach(row => {
+      const subject = row.subject.toLowerCase();
+      if (!data[subject]) {
+        data[subject] = { name: row.subject, topics: {} };
+      }
+      const key = row.topicKey || `topic${Object.keys(data[subject].topics).length + 1}`;
+      data[subject].topics[key] = {
+        title: row.title || "",
+        description: row.description || "",
+        detailed: row.detailed || "",
+        date: row.date || "",
+        content: row.content || ""
+      };
+    });
+    // Ensure any new current topics are merged instead of replacing
+    // (We do not clear 'current' topics before loading csv for current)
+    const csvCurrentTopics = rows.filter(r => r.subject.toLowerCase().trim() === "current");
+    csvCurrentTopics.forEach(row => {
+      const k = row.topicKey || `topic${Object.keys(data.current.topics).length + 1}`;
+      data.current.topics[k] = {
+        title: row.title || "",
+        description: row.description || "",
+        detailed: row.detailed || "",
+        date: row.date || "",
+        content: row.content || ""
+      };
+    });
+    // Refresh current view if current subject is active
+    if (currentSubjectKey && data[currentSubjectKey]) {
+      renderTopicList(currentSubjectKey);
+      showTopicList();
+    }
+  }
+
   function setActiveNav(subj) {
     navButtons.forEach((btn) => {
       const active = btn.dataset.subject === subj;
@@ -414,6 +452,7 @@
       btn.tabIndex = active ? 0 : -1;
     });
   }
+
   function showTopicList() {
     readingPageEl.style.display = "none";
     topicListEl.style.display = "block";
@@ -421,6 +460,7 @@
     readingPageEl.scrollTop = 0;
     topicListEl.scrollTop = 0;
   }
+
   function showReadingPage() {
     topicListEl.style.display = "none";
     readingPageEl.style.display = "block";
@@ -428,28 +468,27 @@
     topicListEl.scrollTop = 0;
     readingPageEl.scrollTop = 0;
   }
+
   function clearSearch() {
     searchInputEl.value = "";
     searchBarEl.style.display = "none";
     searchActive = false;
   }
+
   function renderTopicList(subj, filter = "") {
     topicListEl.innerHTML = "";
     const subject = data[subj];
     if (!subject) return;
     const keys = Object.keys(subject.topics);
-    const filterLower = filter.toLowerCase().trim();
-    const filteredKeys =
-      filter.trim() === ""
-        ? keys
-        : keys.filter((k) => {
-            const t = subject.topics[k];
-            return (
-              t.title.toLowerCase().includes(filterLower) ||
-              t.description.toLowerCase().includes(filterLower) ||
-              (t.detailed && t.detailed.toLowerCase().includes(filterLower))
-            );
-          });
+    const filterLower = (filter || "").toLowerCase().trim();
+    const filteredKeys = filterLower === ""
+      ? keys
+      : keys.filter(
+          (k) =>
+            subject.topics[k].title.toLowerCase().includes(filterLower) ||
+            subject.topics[k].description.toLowerCase().includes(filterLower) ||
+            (subject.topics[k].detailed && subject.topics[k].detailed.toLowerCase().includes(filterLower))
+        );
     if (filteredKeys.length === 0) {
       topicListEl.innerHTML = `<li class="no-result">No topics found.</li>`;
       return;
@@ -477,6 +516,7 @@
       topicListEl.appendChild(li);
     });
   }
+
   function selectTopic(key) {
     const subject = data[currentSubjectKey];
     if (!subject) return;
@@ -488,16 +528,20 @@
     showReadingPage();
     clearSearch();
   }
-  function selectSubject(subj) {
-    if (currentSubjectKey === subj) return;
-    currentSubjectKey = subj;
-    currentTopicKey = null;
-    clearSearch();
-    setActiveNav(subj);
-    renderTopicList(subj);
-    showTopicList();
-  }
-  function toggleSearch() {
+
+  navButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectSubject(btn.dataset.subject);
+    });
+    btn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        selectSubject(btn.dataset.subject);
+      }
+    });
+  });
+
+  searchToggleBtn.addEventListener("click", () => {
     if (searchActive) {
       clearSearch();
       renderTopicList(currentSubjectKey);
@@ -507,43 +551,22 @@
       searchInputEl.focus();
       searchActive = true;
     }
-  }
-  function onSearchInput() {
+  });
+
+  searchInputEl.addEventListener("input", () => {
     renderTopicList(currentSubjectKey, searchInputEl.value);
     showTopicList();
-  }
-  function backToList() {
+  });
+
+  backToTopicsBtn.addEventListener("click", () => {
+    clearSearch();
     renderTopicList(currentSubjectKey);
     showTopicList();
-    appHeaderEl.textContent = data[currentSubjectKey]?.name || "";
-    clearSearch();
-  }
-  function loadDataFromCSV(rows) {
-    ["math", "english", "computer", "current"].forEach((subj) => {
-      if (!data[subj]) data[subj] = { name: subj.charAt(0).toUpperCase() + subj.slice(1), topics: {} };
-      if (subj !== "current") data[subj].topics = {};
-    });
-    rows.forEach((row) => {
-      const subject = row.subject.toLowerCase().trim();
-      if (!data[subject]) {
-        data[subject] = { name: row.subject, topics: {} };
-      }
-      const key = row.topicKey || `topic${Object.keys(data[subject].topics).length + 1}`;
-      data[subject].topics[key] = {
-        title: row.title || "",
-        description: row.description || "",
-        detailed: row.detailed || "",
-        date: row.date || "",
-        content: row.content || "",
-      };
-    });
-    if (currentSubjectKey && data[currentSubjectKey]) {
-      renderTopicList(currentSubjectKey);
-      showTopicList();
-    }
-  }
-  backToTopicsBtn.addEventListener("click", backToList);
+    appHeaderEl.textContent = data[currentSubjectKey].name;
+  });
+
   loadFileBtn.addEventListener("click", () => fileInput.click());
+
   fileInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -560,17 +583,16 @@
     }
   });
 
-  navButtons.forEach((btn) => {
-    btn.addEventListener("click", () => selectSubject(btn.dataset.subject));
-    btn.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        selectSubject(btn.dataset.subject);
-      }
-    });
-  });
-  searchToggleBtn.addEventListener("click", toggleSearch);
-  searchInputEl.addEventListener("input", onSearchInput);
+  function selectSubject(subj) {
+    if (currentSubjectKey === subj) return;
+    currentSubjectKey = subj;
+    currentTopicKey = null;
+    clearSearch();
+    setActiveNav(subj);
+    renderTopicList(subj);
+    showTopicList();
+  }
+
   window.addEventListener("load", () => {
     setActiveNav(currentSubjectKey);
     renderTopicList(currentSubjectKey);
