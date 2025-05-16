@@ -3,1061 +3,734 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Notes App - Final with Theme and Category Edit</title>
+<title>Ultimate Study Dictionary & Current Affairs</title>
+<!-- Font Awesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<!-- Papa Parse CDN for CSV parsing -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
-  /* Reset and base styles */
+  @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
   * {
     box-sizing: border-box;
   }
+
   body, html {
-    margin: 0; padding: 0; height: 100%;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f6fb;
-    color: #111;
-    display: flex;
-    flex-direction: column;
-  }
-  #app {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
-  }
-  /* Login screen black and white, smaller font */
-  #login-screen {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    margin: 0; padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #ffffff;
+    color: #000000;
     height: 100vh;
-    background: #000;
-    color: #fff;
-    font-size: 0.9rem;
-  }
-  #login-screen h2 {
-    margin-bottom: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    font-size: 1.5rem;
-  }
-  #form-tabs {
-    display: flex;
-    margin-bottom: 1.5rem;
-    gap: 1rem;
-  }
-  .tab-button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #111;
-    color: #ccc;
-    border-radius: 10px;
-    padding: 0.7rem 1.5rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: none;
-    user-select: none;
-    transition: background 0.3s ease, color 0.3s ease;
-    border: 2px solid transparent;
-    font-size: 1rem;
-  }
-  .tab-button svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
-  }
-  .tab-button:hover {
-    background: #333;
-    color: #fff;
-  }
-  .tab-button.active {
-    background: #fff;
-    color: #000;
-    border-color: #888;
-    box-shadow: 0 0 12px rgba(255,255,255,0.6);
-  }
-  form {
     display: flex;
     flex-direction: column;
-    width: 280px;
-    background: #111;
-    padding: 1.8rem 2rem 2rem;
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(255,255,255,0.15);
-    color: #eee;
-    font-size: 0.9rem;
+    overflow: hidden;
   }
-  form input[type="text"],
-  form input[type="password"] {
-    padding: 0.6rem 1rem;
-    margin-bottom: 1rem;
-    border: 1.5px solid #666;
-    border-radius: 6px;
-    font-size: 1rem;
-    background: #222;
-    color: #eee;
-    transition: border-color 0.3s ease;
-  }
-  form input[type="text"]::placeholder,
-  form input[type="password"]::placeholder {
-    color: #aaa;
-  }
-  form input[type="text"]:focus,
-  form input[type="password"]:focus {
-    outline: none;
-    border-color: #fff;
-    box-shadow: 0 0 5px 1px #fff;
-    background: #333;
-  }
-  form button {
-    background: #fff;
+
+  header {
+    background: #ffffff;
+    border-bottom: 1px solid #ccc;
     color: #000;
-    font-weight: 700;
-    padding: 0.75rem 1.2rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.05rem;
-    letter-spacing: 0.05em;
-    user-select: none;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-    margin-top: 5px;
-  }
-  form button:hover {
-    background: #bbb;
-    box-shadow: 0 4px 15px rgba(255,255,255,0.5);
-  }
-  #form-message {
-    margin-top: 0.8rem;
-    font-size: 0.9rem;
-    min-height: 1.2em;
+    padding: 10px 16px;
     text-align: center;
-    color: #d32f2f;
-    user-select: none;
     font-weight: 600;
-  }
-  #sidebar {
-    width: 280px;
-    background: linear-gradient(to bottom, #3f51b5, #5c6bc0);
-    color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-    box-shadow: 4px 0 20px rgba(63,81,181,0.4);
-  }
-  #search-container {
-    padding: 1.75rem 1rem 0.75rem;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    flex-shrink: 0;
-  }
-  #search-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 14px;
-    border: none;
-    font-size: 1rem;
-    color: #222;
-    background: #f0f0f0;
-    box-shadow: inset 0 3px 8px rgba(0,0,0,0.1);
-    transition: box-shadow 0.3s ease;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  #search-input:focus {
-    outline: none;
-    box-shadow: 0 0 10px 3px rgba(63,81,181,0.7);
-    background: #fff;
-  }
-  #category-bar {
-    display: flex;
-    padding: 0.5rem 1rem;
-    background: rgba(255,255,255,0.15);
-    border-bottom: 1px solid rgba(255,255,255,0.3);
-    flex-shrink: 0;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
-  }
-  .category-button {
-    background: transparent;
-    border: 2px solid #e0e0e0;
-    color: #e0e0e0;
-    padding: 6px 20px;
-    border-radius: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 1rem;
+    font-size: 12px;
     user-select: none;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    white-space: nowrap;
   }
-  .category-button:hover,
-  .category-button.active {
-    background-color: #fff;
-    color: #3f51b5;
-    border-color: #3f51b5;
-  }
-  #notes-list {
-    flex-grow: 1;
+  main {
+    flex: 1;
     overflow-y: auto;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-  #notes-list li {
-    cursor: pointer;
-    padding: 0.85rem 1.25rem;
-    border: 1px solid transparent;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-    border-radius: 12px;
-    margin: 0.3rem 1rem;
-    background-color: rgba(255,255,255,0.85);
-    color: #333;
-  }
-  #notes-list li:hover {
-    background-color: #e8eaf6;
-    border-color: #3f51b5;
-  }
-  #notes-list li.selected {
-    background-color: #3f51b5;
-    color: white;
-    font-weight: 700;
-    border-color: #3f51b5;
-  }
-  #notes-list li::before {
-    content: "📝";
-    font-size: 1rem;
-    margin-right: 6px;
-  }
-  #btn-new-note {
-    background: #3f51b5;
-    border: none;
+    padding: 14px 12px 90px 12px;
+    max-width: 900px;
+    margin: auto;
     width: 100%;
-    padding: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    cursor: pointer;
+  }
+  /* File load button */
+  #loadFileBtn {
+    position: fixed;
+    top: 12px;
+    left: 16px;
+    background: #000000;
     color: white;
-    transition: background 0.3s ease;
-    flex-shrink: 0;
-    border-radius: 0 0 0 12px;
-    font-size: 1.1rem;
-    box-shadow: 0 -3px 10px rgba(63,81,181,0.3);
+    border: none;
+    padding: 6px 14px;
+    font-size: 12px;
+    border-radius: 3px;
+    user-select: none;
+    cursor: pointer;
+    z-index: 1103;
   }
-  #btn-new-note:hover {
-    background: #2c3a9a;
+  #loadFileBtn:hover {
+    background: #222222;
   }
-  #sidebar-bottom {
-    background: #3f51b5;
-    padding: 1rem;
+  #fileInput {
+    display: none;
+  }
+
+  /* Bottom Navigation Bar with Minimal Black Buttons */
+  footer {
+    background: #ffffff;
+    box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
-    border-radius: 0 0 0 12px;
+    padding: 0 8px;
+    z-index: 1000;
+    border-top: 1px solid #ccc;
   }
-  #btn-dictionary {
-    background: #ffca28;
+
+  .bubble-nav {
+    background-color: #000000;
     border: none;
-    border-radius: 12px;
-    padding: 0.5rem 1rem;
-    color: #283593;
-    font-weight: 700;
+    padding: 6px 14px;
+    font-weight: 600;
+    color: white;
     cursor: pointer;
+    font-size: 10px;
+    min-width: 70px;
+    text-align: center;
     user-select: none;
+    transition: background-color 0.2s ease;
+    border-radius: 2px;
+    letter-spacing: 0.02em;
     display: flex;
-    gap: 8px;
     align-items: center;
-    font-size: 1rem;
-    box-shadow: 0 4px 10px rgba(255,202,40,0.6);
-    transition: background 0.3s ease;
+    justify-content: center;
+    gap: 6px;
   }
-  #btn-dictionary:hover {
-    background: #ffb300;
+  .bubble-nav i {
+    font-size: 0.85rem;
   }
-  #btn-dictionary svg {
-    width: 20px;
-    height: 20px;
+  .bubble-nav.active {
+    background-color: #222222;
   }
-  #btn-category-toggle {
-    background: transparent;
+  .bubble-nav:hover:not(.active) {
+    background-color: #333333;
+  }
+
+  /* Search Bar */
+  #searchBar {
+    position: fixed;
+    bottom: 55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 700px;
+    background: white;
+    border: 1px solid #000;
+    padding: 6px 14px;
+    display: none;
+    z-index: 1050;
+  }
+  #searchInput {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 10px;
+    border: none;
+    outline: none;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #000;
+    background: #f9f9f9;
+    border-radius: 3px;
+    box-sizing: border-box;
+  }
+  #searchInput::placeholder {
+    color: #666;
+  }
+  #searchInput:focus {
+    outline: none;
+    box-shadow: 0 0 6px #000000aa;
+  }
+  #searchToggle {
+    background: #000000;
     border: none;
     cursor: pointer;
-    padding: 0 10px;
-    font-size: 1.5rem;
+    position: fixed;
+    bottom: 110px;
+    right: 16px;
+    z-index: 1100;
+    font-size: 20px;
     color: white;
-    user-select: none;
-    transition: transform 0.3s ease;
-  }
-  #btn-category-toggle.rotated {
-    transform: rotate(90deg);
-  }
-  #logout-btn {
-    background: #b00020;
-    font-weight: 700;
-    padding: 0.6rem 1rem;
-    color: white;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    user-select: none;
-    box-shadow: 0 4px 8px rgba(176,0,32,0.7);
-    transition: background 0.3s ease;
-  }
-  #logout-btn:hover {
-    background: #7a0015;
-    box-shadow: 0 6px 12px rgba(122,0,21,0.9);
-  }
-  #text-size-control {
-    padding: 0.7rem 1rem;
-    border-top: 1px solid #5c6bc0;
+    width: 36px;
+    height: 36px;
     display: flex;
     justify-content: center;
-    gap: 10px;
+    align-items: center;
     user-select: none;
-    background: linear-gradient(to top, #3f51b5, transparent);
+    border-radius: 3px;
+    box-shadow: none;
+    transition: background-color 0.2s ease;
   }
-  #text-size-control button {
-    background: transparent;
-    border: 2px solid #ffca28;
-    color: #ffca28;
-    font-weight: 700;
+  #searchToggle:hover {
+    background-color: #222222;
+  }
+
+  /* Topic List */
+  #topicList {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 840px;
+  }
+  .topic-item {
+    background: #ffffff;
+    border: 1px solid #000000;
+    margin-bottom: 6px;
+    padding: 10px 14px;
     cursor: pointer;
-    border-radius: 12px;
-    font-size: 1rem;
-    padding: 0.35rem 0.75rem;
-    transition: background-color 0.25s ease, color 0.25s ease;
+    font-weight: 600;
+    color: #000000;
+    font-size: 10px;
+    width: 100%;
+    box-sizing: border-box;
     user-select: none;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  #text-size-control button.active,
-  #text-size-control button:hover {
-    background: #ffca28;
-    color: #283593;
+  .topic-item i {
+    font-size: 0.85rem;
+    color: #000;
+    flex-shrink: 0;
   }
-  #main-content {
-    flex-grow: 1;
+  .topic-item:hover {
+    background-color: #000000;
+    color: #ffffff;
+    border-color: #000000;
+  }
+  .topic-item:focus-visible {
+    outline: 2px solid #000000;
+    outline-offset: 2px;
+    background-color: #222222;
+    color: #fff;
+  }
+
+  /* Reading Page */
+  #readingPage {
+    display: none;
+    max-width: 900px;
+    margin: 0 auto 90px;
+    background: #ffffff;
+    border: 1px solid #000000;
+    padding: 28px 32px;
+    line-height: 1.5;
+    color: #000000;
+    font-size: 13px;
+    border-radius: 3px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+  #readingPage h2 {
+    color: #000000;
+    margin-top: 0;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  #readingPage h3 {
+    margin-top: 28px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: #000;
+    font-size: 15px;
+  }
+  #readingPage ul {
+    margin-left: 20px;
+    margin-bottom: 24px;
+    color: #111;
+    font-size: 12px;
+  }
+  #readingPage p {
+    margin-bottom: 18px;
+  }
+  #readingPage pre {
+    background: #f0f0f0;
+    padding: 12px;
+    overflow-x: auto;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #111827;
+    margin-bottom: 18px;
+  }
+  #backToTopics {
+    margin-bottom: 22px;
+    background: #000000;
+    color: white;
+    border: none;
+    padding: 10px 26px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #backToTopics i {
+    font-size: 1rem;
+  }
+  #backToTopics:hover {
+    background-color: #222222;
+  }
+
+  /* Current Affairs reading style */
+  .current-affairs-carousel {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #000000;
+    padding: 28px 32px;
+    color: #000000;
+    min-height: 220px;
     display: flex;
     flex-direction: column;
-    background: #fff;
-    padding: 2rem 2.5rem;
-    min-width: 0;
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
-  }
-  #category-select-container {
-    margin-bottom: 1rem;
-  }
-  #category-select-label {
-    font-weight: 600;
-    margin-bottom: 0.3rem;
-    color: #333;
-    display: block;
-  }
-  #category-select {
-    width: 200px;
-    padding: 0.4rem 0.75rem;
-    font-size: 1rem;
-    border-radius: 7px;
-    border: 1.5px solid #ccc;
-    background: #fff;
-    color: #111;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    outline: none;
-    transition: border-color 0.3s ease;
-  }
-  #category-select:focus {
-    border-color: #3f51b5;
-    box-shadow: 0 0 6px rgba(63,81,181,0.5);
-  }
-  #note-title {
-    border: none;
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    border-bottom: 2.5px solid #3f51b5;
-    padding-bottom: 0.4rem;
-    outline: none;
-    width: 100%;
-    background: transparent;
-    color: #111;
-    resize: none;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    transition: border-color 0.3s ease;
-    border-radius: 8px 8px 0 0;
-  }
-  #note-title:focus {
-    border-color: #283593;
-    box-shadow: 0 0 10px 3px rgba(40,53,147,0.3);
-  }
-  #note-content {
-    flex-grow: 1;
-    font-size: 1rem;
-    border: none;
-    outline: none;
-    resize: none;
-    width: 100%;
-    line-height: 1.5;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: transparent;
-    color: #111;
-    padding: 0.75rem 0.75rem 0.5rem 0.75rem;
-    transition: box-shadow 0.3s ease;
-    border-radius: 0 0 8px 8px;
-  }
-  #note-content:focus {
-    box-shadow: inset 0 0 10px rgba(63,81,181,0.2);
-  }
-  #note-actions {
-    padding-top: 0.75rem;
-    text-align: right;
-    display: flex;
-    gap: 16px;
-  }
-  .icon-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background-color 0.15s ease;
-    color: #3f51b5;
-    display: flex;
-    align-items: center;
     justify-content: center;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 3px;
   }
-  .icon-button:hover:not(:disabled) {
-    background-color: #d8dffb;
+  .carousel-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #000000;
+    font-weight: 700;
   }
-  .icon-button:disabled {
-    color: #aaa;
-    cursor: default;
+  .carousel-date {
+    font-style: italic;
+    color: #444444;
+    margin-bottom: 20px;
+    font-size: 12px;
   }
-  .icon-button svg {
-    width: 26px;
-    height: 26px;
-    fill: currentColor;
+  .carousel-content {
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: #222222;
   }
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #f0f0f0;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #a0a0a0;
-  }
-  @media (max-width: 768px) {
-    #sidebar {
-      width: 240px;
-    }
-    #login-screen form {
-      width: 90vw;
-      max-width: 320px;
-    }
-    #main-content {
-      padding: 1.5rem 1.5rem 2rem;
-    }
-    #main-content.fullscreen #note-actions {
-      position: fixed;
-      bottom: 0;
-      left: 240px;
-      right: 0;
-      background: #fff;
-      padding: 0.5rem 0.75rem;
-      box-shadow: 0 -3px 6px rgba(0,0,0,0.15);
-    }
-  }
-  @media (min-width: 769px) {
-    #main-content.fullscreen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      border-radius: 0;
-      padding: 3rem 4rem;
-      background: #fff;
-      box-shadow: none;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-    }
-    #main-content.fullscreen #note-title {
-      font-size: 2.5rem;
-      border-bottom-width: 4px;
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-radius: 0;
-    }
-    #main-content.fullscreen #note-content {
-      font-size: 1.4rem;
-      border-radius: 0 0 8px 8px;
-    }
-    #main-content.fullscreen #note-actions {
-      padding-top: 1.5rem;
-      position: static;
-      background: none;
-      box-shadow: none;
-    }
+  .no-result {
+    font-weight: 600;
+    font-size: 12px;
+    color: #555555;
+    padding: 50px 0;
+    text-align: center;
   }
 </style>
 </head>
 <body>
+<button id="loadFileBtn" aria-label="Load Topics CSV"><i class="fa-solid fa-file-csv"></i> Load Topics CSV</button>
+<input type="file" id="fileInput" accept=".csv,text/csv" />
 
-<div id="login-screen">
-  <h2 id="form-header">Login to Notes</h2>
-  <div id="form-tabs">
-    <button type="button" id="tab-login" class="tab-button active" role="tab" aria-selected="true" aria-controls="login-form" tabindex="0" aria-label="Login tab">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zM12 14c-3.31 0-6 2.69-6 6v2h12v-2c0-3.31-2.69-6-6-6z"/></svg>
-      Login
-    </button>
-    <button type="button" id="tab-signup" class="tab-button" role="tab" aria-selected="false" aria-controls="signup-form" tabindex="0" aria-label="Sign up tab">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 11h8v2h-8v8h-2v-8H3v-2h8V3h2v8z"/></svg>
-      Sign Up
-    </button>
-  </div>
+<header id="appHeader" tabindex="0" aria-live="polite" aria-atomic="true">Current Affairs</header>
 
-  <form id="login-form" style="display: block;" aria-labelledby="tab-login" autocomplete="off" novalidate>
-    <input type="text" id="login-username" placeholder="Username" autocomplete="username" required aria-required="true" />
-    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" required aria-required="true" />
-    <button type="submit">Login</button>
-  </form>
-  <form id="signup-form" style="display: none;" aria-labelledby="tab-signup" autocomplete="off" novalidate>
-    <input type="text" id="signup-username" placeholder="Username" autocomplete="username" required aria-required="true" />
-    <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password" required aria-required="true" />
-    <input type="password" id="signup-password-confirm" placeholder="Confirm Password" autocomplete="new-password" required aria-required="true" />
-    <button type="submit">Sign Up</button>
-  </form>
-  <div id="form-message" role="alert" aria-live="assertive"></div>
+<main>
+  <!-- Topic List Page -->
+  <ul id="topicList" role="list" aria-label="Subject topics">
+    <!-- Dynamic topic items -->
+  </ul>
+
+  <!-- Reading Page: detailed content with back button -->
+  <section id="readingPage" tabindex="0" aria-live="polite" aria-atomic="true">
+    <button id="backToTopics" aria-label="Back to topic list"><i class="fa-solid fa-arrow-left"></i> Back to Topics</button>
+    <div id="readingContent">
+      <!-- detailed content here -->
+    </div>
+  </section>
+</main>
+
+<button id="searchToggle" aria-label="Toggle Search" title="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+<div id="searchBar" role="search">
+  <input type="search" id="searchInput" placeholder="Search notes and topics..." aria-label="Search notes and topics" autocomplete="off" />
 </div>
 
-<div id="app" style="display:none;">
-  <aside id="sidebar">
-    <div id="search-container">
-      <input type="search" id="search-input" placeholder="Search notes..." autocomplete="off" aria-label="Search notes" />
-    </div>
-    <div id="category-bar" role="group" aria-label="Category selection">
-      <button class="category-button active" data-category="notes">Notes</button>
-      <button class="category-button" data-category="book">Book</button>
-      <button class="category-button" data-category="syllabus">Syllabus</button>
-    </div>
-    <ul id="notes-list" role="listbox" tabindex="0" aria-label="List of notes"></ul>
-    <button id="btn-new-note" aria-label="Create new note">+ New Note</button>
-    <div id="sidebar-bottom">
-      <button id="btn-dictionary" aria-label="Open dictionary" title="Open Dictionary" role="link">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2L2 7v13a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7l-10-5zM4 8.32l8 4.5 8-4.5V18H4V8.32zm8-3.3 8-4-8-4-8 4 8 4z"/></svg>
-        Dictionary
-      </button>
-      <button id="btn-category-toggle" aria-label="Toggle category bar" title="Toggle category bar" aria-expanded="true">&#9654;</button>
-      <button id="logout-btn" aria-label="Logout" title="Logout">
-        <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:currentColor;" aria-hidden="true" focusable="false">
-          <path d="M16 13v-2H7V8l-5 4 5 4v-3zM20 3h-9v2h9v14h-9v2h9a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/>
-        </svg>
-      </button>
-    </div>
-    <div id="text-size-control" role="group" aria-label="Text size controls">
-      <button id="txt-size-small" aria-pressed="false" title="Small text size">Small</button>
-      <button id="txt-size-normal" aria-pressed="true" title="Normal text size" class="active">Normal</button>
-      <button id="txt-size-large" aria-pressed="false" title="Large text size">Large</button>
-    </div>
-  </aside>
-  <main id="main-content" aria-live="polite">
-    <div id="category-select-container" style="display:none;">
-      <label for="category-select">Category:</label>
-      <select id="category-select">
-        <option value="notes">Notes</option>
-        <option value="book">Book</option>
-        <option value="syllabus">Syllabus</option>
-      </select>
-    </div>
-    <input id="note-title" type="text" placeholder="Note Title" aria-label="Note title" />
-    <textarea id="note-content" placeholder="Start typing your note here..." aria-label="Note content"></textarea>
-    <div id="note-actions">
-      <button id="btn-edit-note" class="icon-button" aria-label="Edit note" title="Edit note">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM22.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
-        </svg>
-      </button>
-      <button id="btn-save-note" class="icon-button" aria-label="Save note" title="Save note" disabled>
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4zM5 21V5h11.17L19 7.83V21H5zM9 9h6v6H9V9z"/>
-        </svg>
-      </button>
-      <button id="btn-delete-note" class="icon-button" aria-label="Delete note" title="Delete note" style="color:#d32f2f; border-color:#d32f2f;">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M6 7h12v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7zm3 5v4h2v-4H9zm4 0v4h2v-4h-2zM9 3h6v2H9V3zm7 0h-2V1h-4v2H7v2h10V3z"/>
-        </svg>
-      </button>
-      <button id="btn-fullscreen" class="icon-button" aria-label="Toggle fullscreen note" title="Toggle fullscreen">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:22px; height:22px;">
-          <path d="M7 14H5v5h5v-2H7v-3zm10-7h-3v2h3v3h2v-5h-2zm-3 10h3v3h-5v-2h3v-1zm-7-7h3v-2H7v-3H5v5h2z"/>
-        </svg>
-      </button>
-    </div>
-  </main>
-</div>
+<footer role="tablist" aria-label="Primary subjects navigation">
+  <button class="bubble-nav" data-subject="current" aria-selected="true" role="tab" tabindex="0" aria-controls="topicList" aria-label="Current Affairs"><i class="fa-solid fa-globe"></i>Current</button>
+  <button class="bubble-nav" data-subject="math" aria-selected="false" role="tab" tabindex="-1" aria-controls="topicList" aria-label="Math"><i class="fa-solid fa-square-root-variable"></i>Math</button>
+  <button class="bubble-nav" data-subject="english" aria-selected="false" role="tab" tabindex="-1" aria-controls="topicList" aria-label="English Grammar"><i class="fa-solid fa-book-open"></i>English</button>
+  <button class="bubble-nav" data-subject="computer" aria-selected="false" role="tab" tabindex="-1" aria-controls="topicList" aria-label="Computer"><i class="fa-solid fa-laptop-code"></i>Computer</button>
+</footer>
 
+<script src="https://kit.fontawesome.com/a81368914c.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
 (() => {
-  const loginScreen = document.getElementById('login-screen');
-  const loginForm = document.getElementById('login-form');
-  const signupForm = document.getElementById('signup-form');
-  const formMessage = document.getElementById('form-message');
-  const tabLogin = document.getElementById('tab-login');
-  const tabSignup = document.getElementById('tab-signup');
-  const loginUsernameInput = document.getElementById('login-username');
-  const loginPasswordInput = document.getElementById('login-password');
-  const signupUsernameInput = document.getElementById('signup-username');
-  const signupPasswordInput = document.getElementById('signup-password');
-  const signupPasswordConfirmInput = document.getElementById('signup-password-confirm');
-  const app = document.getElementById('app');
-  const notesListEl = document.getElementById('notes-list');
-  const noteTitleInput = document.getElementById('note-title');
-  const noteContentInput = document.getElementById('note-content');
-  const btnNewNote = document.getElementById('btn-new-note');
-  const btnEditNote = document.getElementById('btn-edit-note');
-  const btnSaveNote = document.getElementById('btn-save-note');
-  const btnDeleteNote = document.getElementById('btn-delete-note');
-  const btnFullscreen = document.getElementById('btn-fullscreen');
-  const searchInput = document.getElementById('search-input');
-  const logoutBtn = document.getElementById('logout-btn');
-  const mainContent = document.getElementById('main-content');
-  const txtSmallBtn = document.getElementById('txt-size-small');
-  const txtNormalBtn = document.getElementById('txt-size-normal');
-  const txtLargeBtn = document.getElementById('txt-size-large');
-  const categoryBar = document.getElementById('category-bar');
-  const btnCategoryToggle = document.getElementById('btn-category-toggle');
-  const btnDictionary = document.getElementById('btn-dictionary');
-  const categoryButtons = categoryBar.querySelectorAll('.category-button');
-  const categorySelectContainer = document.getElementById('category-select-container');
-  const categorySelect = document.getElementById('category-select');
-
-  let currentUser = null;
-  let notes = [];
-  let filteredNotes = [];
-  let selectedNoteId = null;
-  let noteSaved = true;
-  let searchTimeout = null;
-  let isFullscreen = false;
-  let currentTextSize = "normal";
-  let selectedCategoryFilter = 'notes';
-
-  function setTextSize(size) {
-    let titleSize, contentSize;
-    if(size === 'small') {
-      titleSize = '1.4rem';
-      contentSize = '0.9rem';
-    } else if(size === 'large') {
-      titleSize = '2.4rem';
-      contentSize = '1.4rem';
-    } else {
-      titleSize = '1.3rem';
-      contentSize = '1.15rem';
-      size = 'normal';
+  // Initial empty data to be replaced by CSV
+  let data = {
+    current: {
+      name: "Current Affairs",
+      topics: {}
+    },
+    math: {
+      name: "Math",
+      topics: {}
+    },
+    english: {
+      name: "English Grammar",
+      topics: {}
+    },
+    computer: {
+      name: "Computer",
+      topics: {}
     }
-    noteTitleInput.style.fontSize = titleSize;
-    noteContentInput.style.fontSize = contentSize;
-    currentTextSize = size;
-
-    txtSmallBtn.classList.toggle('active', size === 'small');
-    txtNormalBtn.classList.toggle('active', size === 'normal');
-    txtLargeBtn.classList.toggle('active', size === 'large');
-
-    txtSmallBtn.setAttribute('aria-pressed', size === 'small');
-    txtNormalBtn.setAttribute('aria-pressed', size === 'normal');
-    txtLargeBtn.setAttribute('aria-pressed', size === 'large');
-
-    localStorage.setItem('notesapp_textsize', size);
-  }
-
-  function loadTextSize() {
-    const savedSize = localStorage.getItem('notesapp_textsize');
-    setTextSize(savedSize && ['small','normal','large'].includes(savedSize) ? savedSize : 'normal');
-  }
-
-  function generateId() {
-    return 'id-' + Math.random().toString(36).slice(2);
-  }
-  function saveUsers(users) {
-    localStorage.setItem('notesapp_users', JSON.stringify(users));
-  }
-  function loadUsers() {
-    const raw = localStorage.getItem('notesapp_users');
-    try {
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  }
-  function getUserKey(key) {
-    return 'notesapp_' + currentUser + '_' + key;
-  }
-  function saveNotesLocal() {
-    localStorage.setItem(getUserKey('notes'), JSON.stringify(notes));
-  }
-  function loadNotesLocal() {
-    const raw = localStorage.getItem(getUserKey('notes'));
-    try {
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }
-  function saveLogin(user) {
-    localStorage.setItem('notesapp_user', user);
-  }
-  function loadLogin() {
-    const user = localStorage.getItem('notesapp_user');
-    return user ? { user } : null;
-  }
-  function clearLogin() {
-    localStorage.removeItem('notesapp_user');
-  }
-
-  function filterNotesByCategory(notesArray, category) {
-    return notesArray.filter(note => note.category === category);
-  }
-
-  function renderLogin() {
-    loginScreen.style.display = 'flex';
-    app.style.display = 'none';
-    loginForm.reset();
-    signupForm.reset();
-    showLoginForm();
-    currentUser = null;
-    formMessage.textContent = '';
-  }
-  function showLoginForm() {
-    tabLogin.classList.add('active');
-    tabSignup.classList.remove('active');
-    loginForm.style.display = 'block';
-    signupForm.style.display = 'none';
-    formMessage.textContent = '';
-    formMessage.style.color = '#d32f2f';
-  }
-  function showSignupForm() {
-    tabSignup.classList.add('active');
-    tabLogin.classList.remove('active');
-    signupForm.style.display = 'block';
-    loginForm.style.display = 'none';
-    formMessage.textContent = '';
-    formMessage.style.color = '#d32f2f';
-  }
-
-  function renderApp() {
-    loginScreen.style.display = 'none';
-    app.style.display = 'flex';
-    clearNoteFields();
-    renderNotesList();
-    loadTextSize();
-    categorySelectContainer.style.display = 'none'; // hidden initially
-  }
-
-  function clearNoteFields() {
-    noteTitleInput.value = '';
-    noteContentInput.value = '';
-    categorySelect.value = 'notes'; // default
-    categorySelectContainer.style.display = 'none';
-    setNoteEditable(false);
-  }
-  function setNoteEditable(editable) {
-    noteTitleInput.readOnly = !editable;
-    noteContentInput.readOnly = !editable;
-    categorySelect.disabled = !editable;
-    categorySelectContainer.style.display = editable ? 'block' : 'none';
-    noteSaved = !editable;
-    btnSaveNote.disabled = !editable;
-    btnEditNote.disabled = editable;
-  }
-
-  function renderNotesList() {
-    filteredNotes = filterNotesByCategory(notes, selectedCategoryFilter);
-    const searchTerm = searchInput.value.trim().toLowerCase();
-    filteredNotes = filteredNotes.filter(note =>
-      note.title.toLowerCase().includes(searchTerm) ||
-      note.content.toLowerCase().includes(searchTerm)
-    );
-    notesListEl.innerHTML = '';
-    if (filteredNotes.length === 0) {
-      const li = document.createElement('li');
-      li.textContent = '(No notes found)';
-      li.style.userSelect = 'none';
-      li.style.cursor = 'default';
-      notesListEl.appendChild(li);
-      selectedNoteId = null;
-      renderNote(null);
-      return;
-    }
-    filteredNotes.forEach(note => {
-      const li = document.createElement('li');
-      li.textContent = note.title || '(Untitled)';
-      li.setAttribute('role', 'option');
-      li.id = note.id;
-      if (note.id === selectedNoteId) {
-        li.classList.add('active');
-      }
-      li.addEventListener('click', () => selectNote(note.id));
-      notesListEl.appendChild(li);
-    });
-    if (!selectedNoteId || !filteredNotes.find(n => n.id === selectedNoteId)) {
-      selectNote(filteredNotes[0].id);
-    }
-  }
-
-  function renderNote(note) {
-    if (!note) {
-      clearNoteFields();
-      btnDeleteNote.disabled = true;
-      btnEditNote.disabled = true;
-      setNoteEditable(false);
-      btnSaveNote.disabled = true;
-      return;
-    }
-    noteTitleInput.value = note.title;
-    noteContentInput.value = note.content;
-    categorySelect.value = note.category || 'notes';
-    btnDeleteNote.disabled = false;
-    btnEditNote.disabled = false;
-    setNoteEditable(false);
-    btnSaveNote.disabled = true;
-  }
-
-  function selectNote(id) {
-    selectedNoteId = id;
-    noteSaved = true;
-    renderNotesList();
-    const note = notes.find(n => n.id === id);
-    renderNote(note);
-  }
-
-  function doLogin(username, password) {
-    const users = loadUsers();
-    if (!users[username]) {
-      formMessage.textContent = 'User does not exist. Please sign up.';
-      return false;
-    }
-    if (users[username] !== password) {
-      formMessage.textContent = 'Incorrect password.';
-      return false;
-    }
-    currentUser = username;
-    saveLogin(username);
-    notes = loadNotesLocal();
-    renderApp();
-    return true;
-  }
-
-  function doSignup(username, password, confirmPassword) {
-    if (!username || !password || !confirmPassword) {
-      formMessage.textContent = 'Please fill in all fields.';
-      return false;
-    }
-    if (password !== confirmPassword) {
-      formMessage.textContent = 'Passwords do not match.';
-      return false;
-    }
-    const users = loadUsers();
-    if (users[username]) {
-      formMessage.textContent = 'Username already taken. Please choose another.';
-      return false;
-    }
-    users[username] = password;
-    saveUsers(users);
-    formMessage.style.color = '#388e3c';
-    formMessage.textContent = 'Signup successful! You can now login.';
-    showLoginForm();
-    return true;
-  }
-
-  loginForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const username = loginUsernameInput.value.trim();
-    const password = loginPasswordInput.value;
-    doLogin(username, password);
-  });
-
-  signupForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const username = signupUsernameInput.value.trim();
-    const password = signupPasswordInput.value;
-    const confirmPassword = signupPasswordConfirmInput.value;
-    doSignup(username, password, confirmPassword);
-  });
-
-  tabLogin.addEventListener('click', showLoginForm);
-  tabSignup.addEventListener('click', showSignupForm);
-
-  btnNewNote.addEventListener('click', () => {
-    const newId = generateId();
-    const newNote = {
-      id: newId,
-      title: '',
-      content: '',
-      category: categorySelect.value || 'notes',
-      timestamp: Date.now()
-    };
-    notes.unshift(newNote);
-    selectedNoteId = newId;
-    noteSaved = false;
-    saveNotesLocal();
-    renderNotesList();
-    renderNote(newNote);
-    setNoteEditable(true);
-    btnSaveNote.disabled = false;
-  });
-
-  btnEditNote.addEventListener('click', () => {
-    if (!selectedNoteId) {
-      alert('No note selected to edit.');
-      return;
-    }
-    setNoteEditable(true);
-  });
-
-  btnSaveNote.addEventListener('click', () => {
-    if (!selectedNoteId) {
-      alert('No note selected to save.');
-      return;
-    }
-    const title = noteTitleInput.value.trim();
-    const content = noteContentInput.value.trim();
-    const categoryVal = categorySelect.value || 'notes';
-    if (!title) {
-      alert('Note title cannot be empty.');
-      return;
-    }
-    const idx = notes.findIndex(n => n.id === selectedNoteId);
-    if (idx === -1) {
-      notes.push({
-        id: selectedNoteId,
-        title,
-        content,
-        category: categoryVal,
-        timestamp: Date.now()
-      });
-    } else {
-      notes[idx].title = title;
-      notes[idx].content = content;
-      notes[idx].category = categoryVal;
-      notes[idx].timestamp = Date.now();
-    }
-    saveNotesLocal();
-    noteSaved = true;
-    setNoteEditable(false);
-    renderNotesList();
-  });
-
-  btnDeleteNote.addEventListener('click', () => {
-    if (!selectedNoteId) return;
-    if (!confirm('Are you sure you want to delete this note?')) return;
-    notes = notes.filter(n => n.id !== selectedNoteId);
-    saveNotesLocal();
-    selectedNoteId = null;
-    noteSaved = true;
-    renderNotesList();
-    renderNote(null);
-  });
-
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      renderNotesList();
-    }, 250);
-  });
-
-  logoutBtn.addEventListener('click', () => {
-    clearLogin();
-    currentUser = null;
-    notes = [];
-    filteredNotes = [];
-    selectedNoteId = null;
-    noteSaved = true;
-    renderLogin();
-  });
-
-  const dictionaryLinks = {
-    notes: 'https://imrutunjaya.github.io/Dictionary/',
-    book: 'https://imrutunjaya.github.io/Dictionary/',
-    syllabus: 'https://imrutunjaya.github.io/Dictionary/'
   };
 
-  btnCategoryToggle.addEventListener('click', () => {
-    const isActive = categoryBar.classList.toggle('active');
-    btnCategoryToggle.classList.toggle('rotated', isActive);
-    btnCategoryToggle.setAttribute('aria-expanded', isActive.toString());
+  let currentSubjectKey = 'current';
+  let currentTopicKey = null;
+  let searchActive = false;
+  let currentAffairsIndex = 0;
+  let currentAffairsTimerId = null;
+
+  const topicListEl = document.getElementById('topicList');
+  const readingPageEl = document.getElementById('readingPage');
+  const readingContentEl = document.getElementById('readingContent');
+  const appHeaderEl = document.getElementById('appHeader');
+  const searchToggleBtn = document.getElementById('searchToggle');
+  const searchBarEl = document.getElementById('searchBar');
+  const searchInputEl = document.getElementById('searchInput');
+  const navButtons = document.querySelectorAll('.bubble-nav');
+  const backToTopicsBtn = document.getElementById('backToTopics');
+
+  // Function to reset data from CSV array of objects
+  function loadDataFromCSV(rows) {
+    // Reset data
+    data = {
+      current: {name:"Current Affairs", topics:{}},
+      math: {name:"Math", topics:{}},
+      english: {name:"English Grammar", topics:{}},
+      computer: {name:"Computer", topics:{}}
+    };
+    rows.forEach(row => {
+      const subject = row.subject.toLowerCase();
+      if (!data[subject]) {
+        // If unknown subject, add it dynamically
+        data[subject] = {name: row.subject, topics:{}};
+      }
+      data[subject].topics[row.topicKey] = {
+        title: row.title,
+        description: row.description,
+        detailed: row.detailed,
+        date: row.date,
+        content: row.content
+      };
+    });
+  }
+
+  function setActiveNav(subjectKey) {
+    navButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.subject === subjectKey);
+      btn.setAttribute('aria-selected', btn.dataset.subject === subjectKey ? 'true' : 'false');
+      btn.tabIndex = btn.dataset.subject === subjectKey ? 0 : -1;
+    });
+  }
+
+  function showTopicList() {
+    readingPageEl.style.display = 'none';
+    topicListEl.style.display = 'block';
+    appHeaderEl.textContent = data[currentSubjectKey].name;
+    readingPageEl.scrollTop = 0;
+    topicListEl.scrollTop = 0;
+  }
+
+  function showReadingPage() {
+    topicListEl.style.display = 'none';
+    readingPageEl.style.display = 'block';
+    readingPageEl.focus();
+    topicListEl.scrollTop = 0;
+    readingPageEl.scrollTop = 0;
+  }
+
+  function clearSearch() {
+    searchInputEl.value = '';
+    searchBarEl.style.display = 'none';
+    searchActive = false;
+  }
+
+  function renderTopicList(subjectKey, filter = '') {
+    topicListEl.innerHTML = '';
+    const subject = data[subjectKey];
+    if(!subject) return;
+    const topics = subject.topics;
+    const keys = Object.keys(topics);
+    const filterLower = filter.toLowerCase();
+
+    const filteredKeys = filter.trim() === '' ? keys : keys.filter(k => {
+      const t = topics[k];
+      return t.title.toLowerCase().includes(filterLower)
+        || t.description.toLowerCase().includes(filterLower)
+        || (t.detailed && t.detailed.toLowerCase().includes(filterLower));
+    });
+
+    if(filteredKeys.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'no-result';
+      li.textContent = 'No topics found.';
+      topicListEl.appendChild(li);
+      return;
+    }
+
+    filteredKeys.forEach(key => {
+      const topic = topics[key];
+      const li = document.createElement('li');
+      li.tabIndex = 0;
+      li.className = 'topic-item';
+      const iconClass = {
+        current: 'fa-globe',
+        math: 'fa-square-root-variable',
+        english: 'fa-book-open',
+        computer: 'fa-laptop-code'
+      };
+      const subjectIcon = iconClass[currentSubjectKey] || 'fa-circle';
+      li.innerHTML = `<i class="fa-solid ${subjectIcon}"></i> ${topic.title}`;
+      li.onclick = () => selectTopic(key);
+      li.onkeypress = e => {
+        if(e.key === "Enter" || e.key === " ") {
+          selectTopic(key);
+        }
+      };
+      topicListEl.appendChild(li);
+    });
+  }
+
+  function selectTopic(topicKey) {
+    const subject = data[currentSubjectKey];
+    if(!subject) return;
+    const topic = subject.topics[topicKey];
+    if(!topic) return;
+    currentTopicKey = topicKey;
+
+    appHeaderEl.textContent = `${subject.name} - ${topic.title}`;
+    readingContentEl.innerHTML = `
+      <h2>${topic.title}</h2>
+      <p><em>${topic.description}</em></p>
+      ${topic.detailed || ''}
+    `;
+    showReadingPage();
+    clearSearch();
+  }
+
+  function startCurrentAffairsCarousel() {
+    const keys = Object.keys(data.current.topics);
+    if(keys.length === 0) return;
+    currentAffairsIndex = 0;
+    renderCurrentAffairs(keys[currentAffairsIndex]);
+
+    if(currentAffairsTimerId) clearInterval(currentAffairsTimerId);
+    currentAffairsTimerId = setInterval(() => {
+      currentAffairsIndex++;
+      if(currentAffairsIndex >= keys.length) currentAffairsIndex = 0;
+      renderCurrentAffairs(keys[currentAffairsIndex]);
+    }, 15000);
+  }
+
+  function renderCurrentAffairs(key) {
+    const topic = data.current.topics[key];
+    if(!topic) return;
+    currentTopicKey = null;
+    appHeaderEl.textContent = `Current Affairs - ${topic.title}`;
+    readingContentEl.innerHTML = `
+      <div class='current-affairs-carousel'>
+        <div class='carousel-title'>${topic.title}</div>
+        <div class='carousel-date'>${topic.date || ''}</div>
+        <div class='carousel-content'>${topic.content}</div>
+        ${topic.detailed || ''}
+      </div>
+    `;
+    showReadingPage();
+  }
+
+  function stopCurrentAffairsCarousel() {
+    if(currentAffairsTimerId) {
+      clearInterval(currentAffairsTimerId);
+      currentAffairsTimerId = null;
+    }
+  }
+
+  function selectSubject(subjectKey) {
+    if(currentSubjectKey === subjectKey) return;
+    currentSubjectKey = subjectKey;
+    currentTopicKey = null;
+    clearSearch();
+    setActiveNav(subjectKey);
+
+    if(subjectKey === 'current') {
+      startCurrentAffairsCarousel();
+    } else {
+      stopCurrentAffairsCarousel();
+      appHeaderEl.textContent = data[subjectKey].name;
+      renderTopicList(subjectKey);
+      showTopicList();
+    }
+  }
+
+  function toggleSearch() {
+    if(searchActive) {
+      clearSearch();
+      if(currentSubjectKey === 'current') {
+        startCurrentAffairsCarousel();
+      } else {
+        renderTopicList(currentSubjectKey);
+        showTopicList();
+      }
+    } else if(currentSubjectKey) {
+      if(currentSubjectKey === 'current') stopCurrentAffairsCarousel();
+      searchBarEl.style.display = 'block';
+      searchInputEl.focus();
+      searchActive = true;
+    }
+  }
+
+  function onSearchInput() {
+    const query = searchInputEl.value.trim();
+    if(currentSubjectKey === 'current') {
+      const filteredKeys = Object.keys(data.current.topics).filter(k => {
+        const t = data.current.topics[k];
+        const qLower = query.toLowerCase();
+        return (t.title.toLowerCase().includes(qLower) || t.description.toLowerCase().includes(qLower) || t.content.toLowerCase().includes(qLower));
+      });
+
+      if(filteredKeys.length > 0) {
+        stopCurrentAffairsCarousel();
+        topicListEl.innerHTML = '';
+        filteredKeys.forEach(key => {
+          const topic = data.current.topics[key];
+          const li = document.createElement('li');
+          li.tabIndex = 0;
+          li.className = 'topic-item';
+          li.innerHTML = '<i class="fa-solid fa-globe"></i> ' + topic.title;
+          li.onclick = () => selectCurrentAffairsTopic(key);
+          li.onkeypress = e => {
+            if(e.key === "Enter" || e.key === " ") selectCurrentAffairsTopic(key);
+          };
+          topicListEl.appendChild(li);
+        });
+        showTopicList();
+        readingPageEl.style.display = 'none';
+        appHeaderEl.textContent = `Search results for "${query}"`;
+      } else {
+        topicListEl.innerHTML = '<li class="no-result">No results found.</li>';
+        showTopicList();
+        readingPageEl.style.display = 'none';
+        appHeaderEl.textContent = `Search results for "${query}"`;
+      }
+    } else {
+      renderTopicList(currentSubjectKey, query);
+      showTopicList();
+      readingPageEl.style.display = 'none';
+      appHeaderEl.textContent = query ? `Search results for "${query}"` : data[currentSubjectKey].name;
+    }
+  }
+
+  function selectCurrentAffairsTopic(topicKey) {
+    const topic = data.current.topics[topicKey];
+    if(!topic) return;
+    currentTopicKey = topicKey;
+    appHeaderEl.textContent = `Current Affairs - ${topic.title}`;
+    readingContentEl.innerHTML = `
+      <h2>${topic.title}</h2>
+      <p><em>${topic.description}</em></p>
+      <p>${topic.content}</p>
+      ${topic.detailed || ''}
+    `;
+    showReadingPage();
+    clearSearch();
+  }
+
+  // CSV Load UI interactions
+  const loadFileBtn = document.getElementById('loadFileBtn');
+  const fileInput = document.getElementById('fileInput');
+
+  loadFileBtn.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          loadDataFromCSV(results.data);
+          // Refresh UI with loaded data
+          setActiveNav(currentSubjectKey);
+          if (currentSubjectKey === 'current') {
+            startCurrentAffairsCarousel();
+          } else {
+            renderTopicList(currentSubjectKey);
+            showTopicList();
+          }
+        },
+        error: (err) => {
+          alert("Error parsing CSV: " + err.message);
+        }
+      });
+    }
   });
 
-  categoryButtons.forEach(btn => {
+  function loadDataFromCSV(rows) {
+    // Reset data to empty structure
+    data = {
+      current: {name:"Current Affairs", topics:{}},
+      math: {name:"Math", topics:{}},
+      english: {name:"English Grammar", topics:{}},
+      computer: {name:"Computer", topics:{}}
+    };
+    rows.forEach(row => {
+      const subject = row.subject.toLowerCase().trim();
+      if (!data[subject]) {
+        data[subject] = {name: row.subject, topics:{}};
+      }
+      const key = row.topicKey || `topic${Object.keys(data[subject].topics).length + 1}`;
+      data[subject].topics[key] = {
+        title: row.title || "",
+        description: row.description || "",
+        detailed: row.detailed || "",
+        date: row.date || "",
+        content: row.content || ""
+      };
+    });
+  }
+
+  // Nav, search, topic rendering etc. (as before, refactored to use current data object)
+
+  navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      categoryButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const cat = btn.getAttribute('data-category');
-      btnDictionary.dataset.link = dictionaryLinks[cat] || dictionaryLinks.notes;
-      selectedCategoryFilter = cat;
-      renderNotesList();
+      selectSubject(btn.dataset.subject);
+    });
+    btn.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectSubject(btn.dataset.subject);
+      }
     });
   });
 
-  btnDictionary.addEventListener('click', () => {
-    const link = btnDictionary.dataset.link || dictionaryLinks.notes;
-    window.open(link, '_blank', 'noopener');
-  });
-
-  btnDictionary.dataset.link = dictionaryLinks.notes;
-
-  txtSmallBtn.addEventListener('click', () => setTextSize('small'));
-  txtNormalBtn.addEventListener('click', () => setTextSize('normal'));
-  txtLargeBtn.addEventListener('click', () => setTextSize('large'));
-
-  btnFullscreen.addEventListener('click', () => {
-    if (window.innerWidth <= 768 && !isFullscreen) {
-      alert("Fullscreen mode provides best experience on desktop screens.");
-      return;
-    }
-    isFullscreen = !isFullscreen;
-    if (isFullscreen) {
-      mainContent.classList.add('fullscreen');
-      btnFullscreen.title = "Exit fullscreen";
-      btnFullscreen.setAttribute('aria-label', 'Exit fullscreen note');
-      mainContent.scrollTop = 0;
-      setTextSize(currentTextSize);
+  searchToggleBtn.addEventListener('click', toggleSearch);
+  searchInputEl.addEventListener('input', onSearchInput);
+  backToTopicsBtn.addEventListener('click', () => {
+    clearSearch();
+    if(currentSubjectKey === 'current') {
+      startCurrentAffairsCarousel();
     } else {
-      mainContent.classList.remove('fullscreen');
-      btnFullscreen.title = "Toggle fullscreen";
-      btnFullscreen.setAttribute('aria-label', 'Toggle fullscreen note');
-      setTextSize(currentTextSize);
+      appHeaderEl.textContent = data[currentSubjectKey].name;
+      renderTopicList(currentSubjectKey);
+      showTopicList();
     }
   });
 
-  function initialize() {
-    const loginData = loadLogin();
-    if (loginData) {
-      const users = loadUsers();
-      if (users[loginData.user]) {
-        currentUser = loginData.user;
-        notes = loadNotesLocal();
-        renderApp();
-        return;
-      }
+  window.addEventListener('load', () => {
+    setActiveNav(currentSubjectKey);
+    if(currentSubjectKey === 'current') {
+      startCurrentAffairsCarousel();
+    } else {
+      renderTopicList(currentSubjectKey);
+      showTopicList();
     }
-    renderLogin();
-  }
-  initialize();
+  });
 })();
 </script>
 </body>
