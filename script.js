@@ -5,7 +5,7 @@ const GITHUB_REPO = 'repository';
 // This function fetches the content file for a given subject and topic key
 function fetchTopicContent(subject, topicKey) {
   const fileExtension = '.md'; // or '.html' depending on your files
-  const url = `https://${GITHUB_USERNAME}.github.io/${GITHUB_REPO}/${subject}/${topicKey}${fileExtension}`;
+  const url = `https://${imruitunjaya}.github.io/${repository}/${subject}/${topicKey}${fileExtension}`;
 
   return fetch(url)
     .then(response => {
