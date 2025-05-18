@@ -1,78 +1,85 @@
-const data = {
-  Maths: [
-    { title: "Pythagorean Theorem", content: "a² + b² = c²" },
-    { title: "Area of Circle", content: "A = πr²" }
-  ],
-  English: [
-    { title: "Parts of Speech", content: "Noun, Verb, Adjective, etc." },
-    { title: "Tenses", content: "Past, Present, Future" }
-  ]
-};
-
-let currentSubject = "Maths";
-let filteredNotes = [];
-
-const subjectSelect = document.getElementById("subject-select");
-const noteList = document.getElementById("note-list");
-const searchInput = document.getElementById("search");
-const noteDetail = document.getElementById("note-detail");
-const noteTitle = document.getElementById("note-title");
-const noteBody = document.getElementById("note-body");
-const noteSection = document.querySelector("main#note-list");
-
-function init() {
-  for (let subject in data) {
-    const option = document.createElement("option");
-    option.value = subject;
-    option.textContent = subject;
-    subjectSelect.appendChild(option);
+// Sample data
+const notesData = [
+  {
+    subject: "Genetics",
+    title: "DNA Replication",
+    description: "Basics of DNA synthesis and replication fork.",
+    link: "https://example.com/genetics/dna-replication.pdf"
+  },
+  {
+    subject: "Biochemistry",
+    title: "Carbohydrate Metabolism",
+    description: "Overview of glycolysis, Krebs cycle, and more.",
+    link: "https://example.com/biochem/carb-metabolism.pdf"
+  },
+  {
+    subject: "Microbiology",
+    title: "Bacterial Cell Structure",
+    description: "Structure and function of bacterial organelles.",
+    link: "https://example.com/microbio/bacterial-structure.pdf"
+  },
+  {
+    subject: "Genetics",
+    title: "Mendelian Inheritance",
+    description: "Mendel's laws and genetic ratios.",
+    link: "https://example.com/genetics/mendel.pdf"
+  },
+  {
+    subject: "Molecular Biology",
+    title: "Transcription and Translation",
+    description: "mRNA synthesis and protein translation explained.",
+    link: "https://example.com/molbio/central-dogma.pdf"
   }
-  subjectSelect.value = currentSubject;
-  renderNotes();
-}
+];
 
-function switchSubject() {
-  currentSubject = subjectSelect.value;
-  searchInput.value = "";
-  renderNotes();
-}
+const searchInput = document.getElementById("searchInput");
+const subjectButtons = document.querySelectorAll(".subject-bar button");
+const notesGrid = document.getElementById("notesGrid");
 
+let currentFilter = "All";
+
+// Render notes
 function renderNotes() {
-  filteredNotes = data[currentSubject];
-  noteList.innerHTML = "";
+  const searchTerm = searchInput.value.toLowerCase();
+  const filteredNotes = notesData.filter(note => {
+    const matchesSubject = currentFilter === "All" || note.subject === currentFilter;
+    const matchesSearch = note.title.toLowerCase().includes(searchTerm) || note.description.toLowerCase().includes(searchTerm);
+    return matchesSubject && matchesSearch;
+  });
+
+  notesGrid.innerHTML = "";
 
   if (filteredNotes.length === 0) {
-    noteList.innerHTML = "<p>No notes available.</p>";
+    notesGrid.innerHTML = "<p style='text-align:center; color:#999;'>No notes found.</p>";
     return;
   }
 
   filteredNotes.forEach(note => {
-    const div = document.createElement("div");
-    div.className = "note-item";
-    div.textContent = note.title;
-    div.onclick = () => showNoteDetail(note);
-    noteList.appendChild(div);
+    const card = document.createElement("div");
+    card.className = "note-card";
+
+    card.innerHTML = `
+      <h3>${note.title}</h3>
+      <p>${note.description}</p>
+      <a href="${note.link}" target="_blank">Access</a>
+    `;
+
+    notesGrid.appendChild(card);
   });
 }
 
-function showNoteDetail(note) {
-  noteSection.classList.add("hidden");
-  noteDetail.classList.remove("hidden");
-  noteTitle.textContent = note.title;
-  noteBody.textContent = note.content;
-}
+// Subject filter
+subjectButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    subjectButtons.forEach(btn => btn.classList.remove("active"));
+    button.classList.add("active");
+    currentFilter = button.textContent;
+    renderNotes();
+  });
+});
 
-function goBack() {
-  noteDetail.classList.add("hidden");
-  noteSection.classList.remove("hidden");
-}
+// Search filter
+searchInput.addEventListener("input", renderNotes);
 
-function filterNotes() {
-  const term = searchInput.value.toLowerCase();
-  filteredNotes = data[currentSubject].filter(note =>
-    note.title.toLowerCase().includes(term)
-  );
-  renderNotes();
-}
-
-init();
+// Initial render
+renderNotes();
