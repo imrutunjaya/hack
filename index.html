@@ -1,36 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Study Notes</title>
-  <link rel="stylesheet" href="style.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eBook Reading Site</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header id="topbar">
-    <span id="back-button" onclick="goBack()" class="hidden">&#8592;</span>
-    <h1 id="subject-title">Study Notes</h1>
-  </header>
-
-  <main>
-    <div id="search-box" class="hidden">
-      <input type="text" id="search-input" placeholder="Search topics..." oninput="filterTopics()">
+    <div class="topbar">
+        <div class="sidebar">Menu</div>
+        <div class="topic-name">eBook Library</div>
+        <div class="search-icon">🔍</div>
     </div>
-    <div id="topic-container"></div>
-    <div id="note-content" class="hidden"></div>
-  </main>
+    <hr class="divider">
+    <div class="book-list">
+        <div class="book-item">
+            <div class="book-image">
+                <img src="book-cover.jpg" alt="Book Cover">
+            </div>
+            <div class="book-details">
+                <div class="language">English</div>
+                <div class="category">Syllabus/Notes/Category</div>
+                <div class="book-title">Book Name</div>
+                <hr class="item-divider">
+                <div class="essential-topics">Essential Topics</div>
+            </div>
+        </div>
+        <!-- Repeat .book-item for more books -->
+    </div>
 
-  <nav id="bottom-nav">
-    <button onclick="loadSubject('Maths')" id="btn-Maths">Maths</button>
-    <button onclick="loadSubject('Current Affairs')" id="btn-Current Affairs">Current Affairs</button>
-    <button onclick="loadSubject('English')" id="btn-English">English</button>
-    <button onclick="loadSubject('Computer')" id="btn-Computer">Computer</button>
-    <button onclick="loadSubject('Tips & Tricks')" id="btn-Tips & Tricks">Tips & Tricks</button>
-    <button onclick="loadSubject('AI Features')" id="btn-AI Features">AI Features</button>
-    <button onclick="window.location.href='https://imrutunjaya.github.io/Prototype3/'">Advanced Learner's</button>
-    <button onclick="window.location.href='https://imrutunjaya.github.io/notes/'">Annotation</button>
-  </nav>
+    <div class="book-detail-view">
+        <div class="full-width-notes">Full Width Notes</div>
+        <div class="book-info">
+            <div class="book-name">Book Name</div>
+            <div class="whats-inside">What's Inside the Book</div>
+            <div class="topics-covered">Topics Covered</div>
+            <div class="more-details">More Details Overview</div>
+        </div>
+        <div class="action-buttons">
+            <button class="download-button">Download</button>
+            <button class="read-button">Read</button>
+        </div>
+    </div>
 
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
