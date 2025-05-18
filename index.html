@@ -3,26 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Quick Notes</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Smart Notes Library</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a2e0e6b33d.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <header>
-    <h1 id="page-title">Quick Notes</h1>
-    <select id="subject-select" onchange="switchSubject()"></select>
+  <header class="main-header">
+    <div class="hero">
+      <h1><i class="fas fa-book-reader"></i> Smart Notes</h1>
+      <p class="tagline">Explore and access essential notes by subject</p>
+    </div>
   </header>
 
-  <section id="search-section">
-    <input type="text" id="search" placeholder="Search notes..." oninput="filterNotes()" />
-  </section>
+  <main class="main-content">
+    <section class="subject-bar" id="subjects">
+      <!-- Buttons injected here -->
+    </section>
 
-  <main id="note-list"></main>
+    <section class="search-box">
+      <input type="text" id="searchInput" placeholder="Search notes by title..." />
+    </section>
 
-  <section id="note-detail" class="hidden">
-    <button onclick="goBack()" id="back-btn">← Back</button>
-    <h2 id="note-title"></h2>
-    <p id="note-body"></p>
-  </section>
+    <section id="notesContainer" class="notes-grid">
+      <!-- Cards injected here -->
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Crafted with <span class="heart">♥</span> for students | Docs by MJ</p>
+  </footer>
 
   <script src="notes.js"></script>
 </body>
